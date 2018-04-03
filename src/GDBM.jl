@@ -1,5 +1,9 @@
 module GDBM
 
-# package code goes here
+export DBM
 
-end # module
+include("types.jl")
+include("low_level.jl")
+include("dict.jl")
+
+end

@@ -1,5 +1,7 @@
 # GDBM
 
+Wrapper for the library GDBM. Implements partially the interface of associative collections.
+
 [![Build Status](https://travis-ci.org/benlauwens/GDBM.jl.svg?branch=master)](https://travis-ci.org/benlauwens/GDBM.jl)
 
 [![Coverage Status](https://coveralls.io/repos/benlauwens/GDBM.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/benlauwens/GDBM.jl?branch=master)
