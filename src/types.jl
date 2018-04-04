@@ -6,7 +6,7 @@ struct DBM
   DBM(filename::String, flag::String="c") = new(filename, gdbm_open(filename, flag))
 end
 
-Base.close(dbm::DBM) = gdbm_close(dbm)
+Base.close(dbm::DBM) = gdbm_close(dbm.handle)
 
 Base.show(io::IO, dbm::DBM) = print(io, "DBM(<$(dbm.filename)>)")
 
