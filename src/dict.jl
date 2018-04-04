@@ -1,4 +1,4 @@
-function Base.getindex(dbm::DBM, key::String)
+function Base.getindex(dbm::DBM, key::Union{String,Array{UInt8,1}})
   datum = gdbm_fetch(dbm.handle, Datum(key))
   value = unsafe_string(datum.dptr, datum.dsize)
   libc_free(datum.dptr)
@@ -6,7 +6,7 @@ function Base.getindex(dbm::DBM, key::String)
 end
   
 
-function Base.setindex!(dbm::DBM, value::String, key::String)
+function Base.setindex!(dbm::DBM, value::Union{String,Array{UInt8,1}}, key::Union{String,Array{UInt8,1}})
   gdbm_store(dbm.handle, Datum(key), Datum(value))
   key
 end
@@ -27,20 +27,20 @@ end
 
 Base.length(dbm::DBM) = gdbm_count(dbm.handle)
 
-Base.eltype(::Type{DBM}) = Pair{String, String}
+Base.eltype(::Type{DBM}) = Union{Pair{String,String},Pair{String,Array{UInt8,1}},Pair{Array{UInt8,1},String},Pair{Array{UInt8,1},Array{UInt8,1}}}
 
 Base.keytype(::Type{DBM}) = String
 
 Base.valtype(::Type{DBM}) = String
 
-Base.haskey(dbm::DBM, key::String) = gdbm_exists(dbm.handle, Datum(key))
+Base.haskey(dbm::DBM, key::Union{String,Array{UInt8,1}}) = gdbm_exists(dbm.handle, Datum(key))
 
 function Base.delete!(dbm::DBM, key::String)
   gdbm_delete(dbm.handle, Datum(key))
   dbm
 end
 
-function Base.pop!(dbm::DBM, key::String, default = nothing)
+function Base.pop!(dbm::DBM, key::Union{String,Array{UInt8,1}}, default = nothing)
   datum = Datum(key)
   if gdbm_exists(dbm.handle, datum)
     vdatum = gdbm_fetch(dbm.handle, datum)
@@ -53,12 +53,12 @@ function Base.pop!(dbm::DBM, key::String, default = nothing)
   throw(KeyError(key))
 end
 
-function Base.getkey(dbm::DBM, key::String, default::String)
+function Base.getkey(dbm::DBM, key::Union{String,Array{UInt8,1}}, default::String)
   gdbm_exists(dbm.handle, Datum(key)) && return key
   default
 end
 
-function Base.get(dbm::DBM, key::String, default::String)
+function Base.get(dbm::DBM, key::Union{String,Array{UInt8,1}}, default::String)
   value = default
   datum = Datum(key)
   if gdbm_exists(dbm.handle, datum)
@@ -69,7 +69,7 @@ function Base.get(dbm::DBM, key::String, default::String)
   value
 end
 
-function Base.get!(dbm::DBM, key::String, default::String)
+function Base.get!(dbm::DBM, key::Union{String,Array{UInt8,1}}, default::String)
   value = default
   datum = Datum(key)
   if gdbm_exists(dbm.handle, datum)
@@ -98,7 +98,7 @@ function Base.empty!(dbm::DBM)
   end
 end
 
-function Base.in(pair::Pair{String,String}, dbm::DBM)
+function Base.in(pair::Union{Pair{String,String},Pair{String,Array{UInt8,1}},Pair{Array{UInt8,1},String},Pair{Array{UInt8,1},Array{UInt8,1}}}, dbm::DBM)
   datum = Datum(pair.first)
   !gdbm_exists(dbm.handle, datum) && return false
   vdatum = gdbm_fetch(dbm.handle, datum)

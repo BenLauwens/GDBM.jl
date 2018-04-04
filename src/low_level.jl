@@ -50,6 +50,6 @@ function gdbm_nextkey(handle::Ptr{Cvoid}, prev::Datum)
   ccall((:gdbm_nextkey, "libgdbm"), Datum, (Ptr{Cvoid}, Datum), handle, prev)
 end
 
-function libc_free(ptr::Ptr{Int8})
-  ccall((:free, "libc"), Cvoid, (Ptr{Int8}, ), ptr)
+function libc_free(ptr::Ptr{UInt8})
+  ccall((:free, "libc"), Cvoid, (Ptr{UInt8}, ), ptr)
 end

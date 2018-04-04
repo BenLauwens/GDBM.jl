@@ -11,9 +11,10 @@ Base.close(dbm::DBM) = gdbm_close(dbm.handle)
 Base.show(io::IO, dbm::DBM) = print(io, "DBM(<$(dbm.filename)>)")
 
 struct Datum
-  dptr :: Ptr{Int8}
+  dptr :: Ptr{UInt8}
   dsize :: Int32
-  Datum(str::String) = new(Base.unsafe_convert(Ptr{Int8}, str), length(str))
+  Datum(str::String) = new(Base.unsafe_convert(Ptr{UInt8}, str), length(str))
+  Datum(bytes::Array{UInt8,1}) = new(Base.unsafe_convert(Ptr{UInt8}, bytes), length(bytes))
 end
 
 const OPENFLAGS = Dict("r"=>0, "w"=>1, "c"=>2, "n"=>3)
