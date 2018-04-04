@@ -6,46 +6,50 @@ function gdbm_open(name::String, flag::String="r")
   handle
 end
 
-function gdbm_close(dbm::DBM)
-  ccall((:gdbm_close, "libgdbm"), Cvoid, (Ptr{Cvoid},), dbm.handle)
+function gdbm_close(handle::Ptr{Cvoid})
+  ccall((:gdbm_close, "libgdbm"), Cvoid, (Ptr{Cvoid},), handle)
 end
 
-function gdbm_store(dbm::DBM, key::String, value::String, flag::String="r")
-  ret = ccall((:gdbm_store, "libgdbm"), Int32, (Ptr{Cvoid}, Datum, Datum, Int32), dbm.handle, (key, length(key)), (value, length(value)), STOREFLAGS[flag])
-  ret == -1 && println("Not stored: database is not writable or key/value is an empty string.")
-  ret == 1 && println("Not stored: key is already in database.")
+function gdbm_store(handle::Ptr{Cvoid}, key::Datum, value::Datum, flag::String="r")
+  ret = ccall((:gdbm_store, "libgdbm"), Int32, (Ptr{Cvoid}, Datum, Datum, Int32), handle, key, value, STOREFLAGS[flag])
+  ret == -1 && error("Database is not writable or key/value is not a valid string.")
+  ret == 1 && error("Key is already in database.")
   nothing
 end
 
-function gdbm_fetch(dbm::DBM, key::String)
-  datum = ccall((:gdbm_fetch, "libgdbm"), Datum, (Ptr{Cvoid}, Datum), dbm.handle, (key, length(key)))
-  datum.dptr ≠ C_NULL && return unsafe_string(datum.dptr, datum.dsize)
-  println("Key not found.")
+function gdbm_fetch(handle::Ptr{Cvoid}, key::Datum)
+  datum = ccall((:gdbm_fetch, "libgdbm"), Datum, (Ptr{Cvoid}, Datum), handle, key)
+  datum.dptr == C_NULL && throw(KeyError(key))
+  datum
 end
 
-function gdbm_exists(dbm::DBM, key::String)
-  ret = ccall((:gdbm_exists, "libgdbm"), Int32, (Ptr{Cvoid}, Datum), dbm.handle, (key, length(key)))
+function gdbm_exists(handle::Ptr{Cvoid}, key::Datum)
+  ret = ccall((:gdbm_exists, "libgdbm"), Int32, (Ptr{Cvoid}, Datum), handle, key)
   ret == 0 && return false
   true
 end
 
-function gdbm_count(dbm::DBM)
+function gdbm_count(handle::Ptr{Cvoid})
   count = Ref(UInt(0))
-  ret = ccall((:gdbm_count, "libgdbm"), Int32, (Ptr{Cvoid}, Ref{UInt}), dbm.handle, count)
+  ret = ccall((:gdbm_count, "libgdbm"), Int32, (Ptr{Cvoid}, Ref{UInt}), handle, count)
   ret == -1 && error("Error reading database.")
   Int(count[])
 end
 
-function gdbm_delete(dbm::DBM, key::String)
-  ret = ccall((:gdbm_delete, "libgdbm"), Int32, (Ptr{Cvoid}, Datum), dbm.handle, (key, length(key)))
-  ret == 0 && return
-  println("Not deleted: database is not writable or key not found.")
+function gdbm_delete(handle::Ptr{Cvoid}, key::Datum)
+  ret = ccall((:gdbm_delete, "libgdbm"), Int32, (Ptr{Cvoid}, Datum), handle, key)
+  ret ≠ 0 && error("Database is not writable or key not found.")
+  nothing
 end
 
-function gdbm_firstkey(dbm::DBM)
-  ccall((:gdbm_firstkey, "libgdbm"), Datum, (Ptr{Cvoid}, ), dbm.handle)
+function gdbm_firstkey(handle::Ptr{Cvoid})
+  ccall((:gdbm_firstkey, "libgdbm"), Datum, (Ptr{Cvoid}, ), handle)
 end
 
-function gdbm_nextkey(dbm::DBM, prev::Datum)
-  ccall((:gdbm_nextkey, "libgdbm"), Datum, (Ptr{Cvoid}, Datum), dbm.handle, prev)
+function gdbm_nextkey(handle::Ptr{Cvoid}, prev::Datum)
+  ccall((:gdbm_nextkey, "libgdbm"), Datum, (Ptr{Cvoid}, Datum), handle, prev)
+end
+
+function libc_free(ptr::Ptr{Int8})
+  ccall((:free, "libc"), Cvoid, (Ptr{Int8}, ), ptr)
 end

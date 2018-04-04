@@ -13,12 +13,9 @@ Base.show(io::IO, dbm::DBM) = print(io, "DBM(<$(dbm.filename)>)")
 struct Datum
   dptr :: Ptr{Int8}
   dsize :: Int32
+  Datum(str::String) = new(Base.unsafe_convert(Ptr{Int8}, str), length(str))
 end
 
 const OPENFLAGS = Dict("r"=>0, "w"=>1, "c"=>2, "n"=>3)
 
 const STOREFLAGS = Dict("r"=>1, "i"=>0)
-
-Base.cconvert(::Type{Datum}, v::Tuple) = (Base.cconvert(Ptr{Int8}, v[1]), v[2])
-
-Base.unsafe_convert(::Type{Datum}, v::Tuple) = Datum(Base.unsafe_convert(Ptr{Int8}, v[1]), v[2])
