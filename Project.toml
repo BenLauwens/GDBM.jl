@@ -1,0 +1,4 @@
+name = "GDBM"
+uuid = "341c0681-5542-4423-8fbd-ac5c38fa816b"
+authors = ["Ben Lauwens <ben.lauwens@gmail.com>"]
+version = "0.1.0"
