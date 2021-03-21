@@ -2,7 +2,7 @@ module GDBM
 
 export DBM
 
-include("../deps/deps.jl")
+include(joinpath("..", "deps", "deps.jl")
 
 __init__() = check_deps()
 
