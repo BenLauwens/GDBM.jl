@@ -2,6 +2,8 @@ module GDBM
 
 export DBM
 
+include("../deps/deps.jl")
+
 __init__() = check_deps()
 
 include("types.jl")
