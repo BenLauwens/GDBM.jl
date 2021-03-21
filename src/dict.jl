@@ -11,17 +11,14 @@ function Base.setindex!(dbm::DBM, value::Union{String,Array{UInt8,1}}, key::Unio
   key
 end
 
-Base.start(dbm::DBM) = gdbm_firstkey(dbm.handle)
-
-Base.done(dbm::DBM, state::Datum) = state.dptr == C_NULL
-
-function Base.next(dbm::DBM, prev::Datum)
-  key = unsafe_string(prev.dptr, prev.dsize)
-  datum = gdbm_fetch(dbm.handle, prev)
+function Base.iterate(dbm::DBM, state=gdbm_firstkey(dbm.handle))
+  state.dptr == C_NULL && return nothing
+  key = unsafe_string(state.dptr, state.dsize)
+  datum = gdbm_fetch(dbm.handle, state)
   value = unsafe_string(datum.dptr, datum.dsize)
   libc_free(datum.dptr)
-  next = gdbm_nextkey(dbm.handle, prev)
-  libc_free(prev.dptr)
+  next = gdbm_nextkey(dbm.handle, state)
+  libc_free(state.dptr)
   ((key, value), next)
 end
 
