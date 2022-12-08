@@ -2,9 +2,7 @@ module GDBM
 
 export DBM
 
-include(joinpath("..", "deps", "deps.jl"))
-
-__init__() = check_deps()
+using Gdbm_jll
 
 include("types.jl")
 include("low_level.jl")
